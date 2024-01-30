@@ -1,2 +1,1 @@
-# HPC-UNIGE
-High Performance Computing course at UniGe
+![](https://github.com/thaMilo/HPC-UNIGE/blob/main/Banner.svg)
