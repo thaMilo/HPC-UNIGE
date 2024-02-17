@@ -1,5 +1,0 @@
-/target
-.DS_STORE
-/mandlebrot_ppm/*
-/mandlebrot_txt/*
-Cargo.lock
