@@ -1,0 +1,1 @@
+/Users/milogalli/Desktop/Milo/university/DOING/HPC-UNIGE/Mandelbrot/metalcrab/target/debug/metalcrab: /Users/milogalli/Desktop/Milo/university/DOING/HPC-UNIGE/Mandelbrot/metalcrab/src/main.rs /Users/milogalli/Desktop/Milo/university/DOING/HPC-UNIGE/Mandelbrot/metalcrab/src/metal/dotprod.metallib
