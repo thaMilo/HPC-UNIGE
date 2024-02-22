@@ -12,7 +12,7 @@ from alive_progress import alive_bar
 PATH = './output/'
 
 def compute_accuracy(reference_file, output_file):
-    ref = np.loadtxt(reference_file, delimiter=',')
+    ref = np.loadtxt(reference_file, delimiter=',') #chiedere a Samu se l'output è il file di interi del professore
     out = np.loadtxt(output_file, delimiter=',')
 
     differences = np.abs(ref - out)
@@ -22,7 +22,6 @@ def compute_accuracy(reference_file, output_file):
 def main():
     reference_file = PATH + 'sequential_out.txt'
     print(f'Reference file: {reference_file}')
-
     accurancies = []
 
     # search for all files in output folder and subfolders
@@ -34,7 +33,7 @@ def main():
 
     # compute accuracy for each file
     with alive_bar(len(all_files)) as bar:
-        for file in all_files:
+        for file in all_files: 
             tmp = {}
             tmp['file'] = file
             accuracy, count, total = compute_accuracy(reference_file, file)

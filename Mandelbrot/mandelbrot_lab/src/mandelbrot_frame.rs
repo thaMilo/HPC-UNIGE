@@ -1,8 +1,10 @@
 use anyhow::Result;
+use metal::{Device, DeviceRef, MTLResourceOptions};
 use num_complex::Complex;
 use std::fs;
-use std::fs::File;
 use std::io::Write;
+
+const LIB_DATA: &[u8] = include_bytes!("metal/mandelbrot.metallib");
 
 pub struct MandelBrotFrame {
     min_x: i32,
@@ -42,6 +44,88 @@ impl MandelBrotFrame {
             degree,
             iterations,
         }
+    }
+
+    pub fn compute_metal(&self) -> Vec<i32> {
+        let device: &DeviceRef = &Device::system_default().expect("No device found");
+        let lib = device.new_library_with_data(LIB_DATA).unwrap();
+        let function = lib.get_function("generateMandelbrotSet", None).unwrap();
+        let pipeline = device
+            .new_compute_pipeline_state_with_function(&function)
+            .unwrap();
+
+        let buffer_step = device.new_buffer_with_data(
+            unsafe { std::mem::transmute(&self.step) },
+            std::mem::size_of::<f64>() as u64,
+            MTLResourceOptions::StorageModeShared,
+        );
+
+        let buffer_min_x = device.new_buffer_with_data(
+            unsafe { std::mem::transmute(&self.min_x) },
+            std::mem::size_of::<i32>() as u64,
+            MTLResourceOptions::StorageModeShared,
+        );
+
+        let buffer_min_y = device.new_buffer_with_data(
+            unsafe { std::mem::transmute(&self.min_y) },
+            std::mem::size_of::<i32>() as u64,
+            MTLResourceOptions::StorageModeShared,
+        );
+
+        let buffer_width = device.new_buffer_with_data(
+            unsafe { std::mem::transmute(&self.width) },
+            std::mem::size_of::<i32>() as u64,
+            MTLResourceOptions::StorageModeShared,
+        );
+
+        let buffer_height = device.new_buffer_with_data(
+            unsafe { std::mem::transmute(&self.height) },
+            std::mem::size_of::<i32>() as u64,
+            MTLResourceOptions::StorageModeShared,
+        );
+
+        let buffer_iterations = device.new_buffer_with_data(
+            unsafe { std::mem::transmute(&self.iterations) },
+            std::mem::size_of::<i32>() as u64,
+            MTLResourceOptions::StorageModeShared,
+        );
+
+        let buffer_result = device.new_buffer(
+            (self.width * self.height * 4) as u64,
+            MTLResourceOptions::StorageModeShared,
+        );
+
+        let command_queue = device.new_command_queue();
+        let command_buffer = command_queue.new_command_buffer();
+        let compute_encoder = command_buffer.new_compute_command_encoder();
+
+        compute_encoder.set_compute_pipeline_state(&pipeline);
+        compute_encoder.set_buffers(
+            0,
+            &[
+                Some(&buffer_result),
+                Some(&buffer_step),
+                Some(&buffer_min_x),
+                Some(&buffer_min_y),
+                Some(&buffer_width),
+                Some(&buffer_height),
+                Some(&buffer_iterations),
+            ],
+            &[0; 7],
+        );
+
+        // specify thread count and organization
+        let grid_size = metal::MTLSize::new((self.width * self.height) as u64, 1, 1);
+        let threadgroup_size = metal::MTLSize::new((self.width * self.height) as u64, 1, 1);
+        compute_encoder.dispatch_threads(grid_size, threadgroup_size);
+        compute_encoder.end_encoding();
+        command_buffer.commit();
+        command_buffer.wait_until_completed();
+
+        let ptr = buffer_result.contents() as *const i32;
+        let len = buffer_result.length() as usize / std::mem::size_of::<i32>();
+        let slice = unsafe { std::slice::from_raw_parts(ptr, len) };
+        slice.to_vec()
     }
 
     pub fn compute_set(&self) -> Vec<i32> {
