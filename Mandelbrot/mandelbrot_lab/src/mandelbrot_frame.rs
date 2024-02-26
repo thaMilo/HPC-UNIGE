@@ -116,7 +116,7 @@ impl MandelBrotFrame {
 
         // specify thread count and organization
         let grid_size = metal::MTLSize::new((self.width * self.height) as u64, 1, 1);
-        let threadgroup_size = metal::MTLSize::new((self.width * self.height) as u64, 1, 1);
+        let threadgroup_size = metal::MTLSize::new(1024, 1, 1);
         compute_encoder.dispatch_threads(grid_size, threadgroup_size);
         compute_encoder.end_encoding();
         command_buffer.commit();
