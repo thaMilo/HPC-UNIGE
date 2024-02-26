@@ -15,27 +15,23 @@ kernel void generateMandelbrotSet(device float* image [[buffer(0)]],
                                   device int* WIDTH [[buffer(4)]],
                                   device int* HEIGHT [[buffer(5)]],
                                   device int* iterations [[buffer(6)]],
-                                  uint pos [[thread_position_in_grid]]
+                                  uint2 pos [[thread_position_in_grid]]
                                   ) {
 
-    int col = pos % WIDTH[0] ;
-    int row = pos / WIDTH[0] ;
 
-    /*
-    Complex constant_complex_number = {(float)(MIN_X[0] + col * STEP[0]), (float)(MIN_Y[0] + row * STEP[0])};
+    Complex constant_complex_number = {(float)(MIN_X[0] + pos.x * STEP[0]), (float)(MIN_Y[0] + pos.y * STEP[0])};
     Complex z = {0.0f, 0.0f};
 
     for ( int i = 0; i < iterations[0]; i++ ) {
         float temp = z.re * z.re -  z.im * z.im + constant_complex_number.re;
         z.im = 2.0f * z.re * z.im + constant_complex_number.im;
         z.re = temp;
-        if (sqrt(z.re * z.re + z.im * z.im) > 2.0f) {
-            image[row*col] = i;
+        if ((z.re * z.re + z.im * z.im) > 4.0f) {
+            image[pos.x + ( WIDTH[0] * pos.y )] = i;
+            break;
         }else{
-            image[row*col] = 0;
+            image[pos.x + ( WIDTH[0] * pos.y )] = 0;
+            break;
         }
     }
-    */
-
-    image[pos] = 100;
 }
