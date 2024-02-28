@@ -14,24 +14,24 @@ pub struct MandelBrotFrame {
     resolution: i32,
     width: i32,
     height: i32,
-    step: f64,
+    step: f32,
     degree: i32,
     iterations: i32,
 }
 
 impl MandelBrotFrame {
     pub fn new(
-        min_x: i32,
-        max_x: i32,
-        min_y: i32,
-        max_y: i32,
-        resolution: i32,
-        degree: i32,
-        iterations: i32,
+        min_x: i32,      // -2
+        max_x: i32,      //  1
+        min_y: i32,      // -1
+        max_y: i32,      //  1
+        resolution: i32, // 1000
+        degree: i32,     // 2
+        iterations: i32, // 1000
     ) -> Self {
         let width = (max_x - min_x) * resolution;
         let height = (max_y - min_y) * resolution;
-        let step = (max_x - min_x) as f64 / width as f64;
+        let step = (max_x - min_x) as f32 / width as f32; // (1-(-2))/3000 = 0.001
         MandelBrotFrame {
             min_x,
             max_x,
@@ -56,7 +56,7 @@ impl MandelBrotFrame {
 
         let buffer_step = device.new_buffer_with_data(
             unsafe { std::mem::transmute(&self.step) },
-            std::mem::size_of::<f64>() as u64,
+            std::mem::size_of::<f32>() as u64,
             MTLResourceOptions::StorageModeShared,
         );
 
@@ -135,8 +135,8 @@ impl MandelBrotFrame {
             let row = pos / self.width;
             let col = pos % self.width;
             let constant_complex_number = Complex::new(
-                self.min_x as f64 + col as f64 * self.step,
-                self.min_y as f64 + row as f64 * self.step,
+                self.min_x as f32 + col as f32 * self.step,
+                self.min_y as f32 + row as f32 * self.step,
             );
 
             let mut z = Complex::new(0.0, 0.0);
@@ -162,8 +162,8 @@ impl MandelBrotFrame {
             for col in 0..self.width {
                 let val = data[(row * self.width + col) as usize];
                 let refined_val = val.min(255);
-                let ig = (refined_val as f64 * (1000.0 / 255.0)) as i32;
-                let ib = (refined_val as f64 * (1000.0 / 255.0)) as i32;
+                let ig = (refined_val as f32 * (1000.0 / 255.0)) as i32;
+                let ib = (refined_val as f32 * (1000.0 / 255.0)) as i32;
                 f.write_all(format!("0 {} {}", ig, ib).as_bytes())?;
 
                 if col < self.width - 1 {

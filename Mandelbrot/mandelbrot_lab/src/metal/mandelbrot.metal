@@ -7,6 +7,20 @@ struct Complex {
     float re, im;
 };
 
+Complex pow(Complex c) {
+    Complex result;
+    result.re = c.re * c.re - c.im * c.im;
+    result.im = c.re * c.im + c.im * c.re;
+    return result;
+}
+
+Complex add(Complex a, Complex b) {
+    Complex result;
+    result.re = a.re + b.re;
+    result.im = a.im + b.im;
+    return result;
+}
+
 // Metal compute kernel function
 kernel void generateMandelbrotSet(device float* image [[buffer(0)]],
                                   device float* STEP [[buffer(1)]],
@@ -17,21 +31,23 @@ kernel void generateMandelbrotSet(device float* image [[buffer(0)]],
                                   device int* iterations [[buffer(6)]],
                                   uint2 pos [[thread_position_in_grid]]
                                   ) {
+    //image[pos.x + ( WIDTH[0] * pos.y )] = 0;
 
+    Complex constant_complex_number = {
+        (float)(pos.x * 0.001 + MIN_X[0]),
+        (float)(pos.y * 0.001 + MIN_Y[0])
+    };
 
-    Complex constant_complex_number = {(float)(MIN_X[0] + pos.x * STEP[0]), (float)(MIN_Y[0] + pos.y * STEP[0])};
     Complex z = {0.0f, 0.0f};
 
     for ( int i = 0; i < iterations[0]; i++ ) {
-        float temp = z.re * z.re -  z.im * z.im + constant_complex_number.re;
-        z.im = 2.0f * z.re * z.im + constant_complex_number.im;
-        z.re = temp;
-        if ((z.re * z.re + z.im * z.im) > 4.0f) {
+        z = pow(z);
+        z.re += constant_complex_number.re;
+        z.im += constant_complex_number.im;
+
+        if ((z.re * z.re + z.im * z.im) >= 4.0f) {
             image[pos.x + ( WIDTH[0] * pos.y )] = i;
-            break;
-        }else{
-            image[pos.x + ( WIDTH[0] * pos.y )] = 0;
-            break;
+            return;
         }
     }
 }
