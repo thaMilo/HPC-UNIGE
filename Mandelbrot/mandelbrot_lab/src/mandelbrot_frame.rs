@@ -31,7 +31,7 @@ impl MandelBrotFrame {
     ) -> Self {
         let width = (max_x - min_x) * resolution;
         let height = (max_y - min_y) * resolution;
-        let step = (max_x - min_x) as f32 / width as f32; // (1-(-2))/3000 = 0.001
+        let step = (max_x - min_x) as f32 / width as f32;
         MandelBrotFrame {
             min_x,
             max_x,
@@ -91,7 +91,7 @@ impl MandelBrotFrame {
         );
 
         let buffer_result = device.new_buffer(
-            (self.width * self.height * 4) as u64,
+            (self.width * self.height * std::mem::size_of::<i32>() as i32) as u64,
             MTLResourceOptions::StorageModeShared,
         );
 
@@ -161,9 +161,14 @@ impl MandelBrotFrame {
         for row in 0..self.height {
             for col in 0..self.width {
                 let val = data[(row * self.width + col) as usize];
-                let refined_val = val.min(255);
-                let ig = (refined_val as f32 * (1000.0 / 255.0)) as i32;
-                let ib = (refined_val as f32 * (1000.0 / 255.0)) as i32;
+                /* 1000 -> 255 in rgb
+                  0 -> 0 in rgb
+                  1000 : 255 = val : x
+                  x = val * 255 / 1000
+                */
+                // let refined_val = val.min(255);
+                let ig = (val as f32 * (255.0 / self.iterations as f32)) as i32;
+                let ib = (val as f32 * (255.0 / self.iterations as f32)) as i32;
                 f.write_all(format!("0 {} {}", ig, ib).as_bytes())?;
 
                 if col < self.width - 1 {
