@@ -161,16 +161,9 @@ impl MandelBrotFrame {
         for row in 0..self.height {
             for col in 0..self.width {
                 let val = data[(row * self.width + col) as usize];
-                /* 1000 -> 255 in rgb
-                  0 -> 0 in rgb
-                  1000 : 255 = val : x
-                  x = val * 255 / 1000
-                */
-                // let refined_val = val.min(255);
                 let ig = (val as f32 * (255.0 / self.iterations as f32)) as i32;
                 let ib = (val as f32 * (255.0 / self.iterations as f32)) as i32;
                 f.write_all(format!("0 {} {}", ig, ib).as_bytes())?;
-
                 if col < self.width - 1 {
                     f.write_all(b"\n")?;
                 }
