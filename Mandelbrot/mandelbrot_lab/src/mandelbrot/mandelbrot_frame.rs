@@ -162,14 +162,6 @@ impl MandelBrotFrame {
         allocation_time: Duration,
         computation_time: Duration,
     ) {
-        /*
-        let mut file = OpenOptions::new()
-            .write(true)
-            .append(true)
-            .create(true)
-            .open("statistics.csv")
-            .unwrap();
-            */
     }
 
     pub fn compute_set(&self) -> Vec<i32> {
@@ -186,7 +178,7 @@ impl MandelBrotFrame {
             let mut z = Complex::new(0.0, 0.0);
             for i in 0..self.iterations {
                 z = z.powi(self.degree) + constant_complex_number;
-                if (z.re * z.re + z.im * z.im) >= 4.0 {
+                if z.norm() >= 2.0 {
                     image[pos as usize] = i;
                     break;
                 }
@@ -195,8 +187,7 @@ impl MandelBrotFrame {
         image
     }
 
-
-    pub fn visualize(&self, data: Vec<i32>, filepath: &str) -> Result<(), anyhow::Error> {
+    pub fn visualize(&self, data: &Vec<i32>, filepath: &str) -> Result<(), anyhow::Error> {
         let mut f = fs::File::create(filepath)?;
         f.write_all(b"P3\n")?;
         f.write_all(format!("{} {}\n", self.width, self.height).as_bytes())?;

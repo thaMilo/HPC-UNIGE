@@ -1,5 +1,8 @@
-use crate::mandelbrot_frame::MandelBrotFrame;
-mod mandelbrot_frame;
+use crate::mandelbrot::mandelbrot_frame::MandelBrotFrame;
+use crate::mandelbrot::mandelbrot_analysis;
+
+mod mandelbrot;
+
 use clap::{command, Arg};
 
 fn main() {
@@ -66,8 +69,10 @@ fn main() {
             .expect("iterations is not a number"),
     );
 
-    let data = frame.compute_metal();
-    frame
-        .visualize(data, "./mandelbrot_set.ppm")
-        .expect("not able to create visualization file");
+    let sequential_data : Vec<i32> = frame.compute_set();
+    frame.visualize(&sequential_data, "./mandelbrot/output_ppm/sequential.ppm");
+    let metal_data : Vec<i32> = frame.compute_metal();
+    frame.visualize(&metal_data, "./mandelbrot/output_ppm/metal.ppm");
+    let error_data  : mandelbrot_analysis::MandelBrotError = mandelbrot_analysis::compute_error(&sequential_data, &metal_data).expect("The vectors have different lengths");
+    frame.visualize(&error_data.error_vector, "./mandelbrot/output_ppm/error.ppm");
 }
