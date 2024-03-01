@@ -31,8 +31,6 @@ kernel void generateMandelbrotSet(device float* image [[buffer(0)]],
                                   device int* iterations [[buffer(6)]],
                                   uint2 pos [[thread_position_in_grid]]
                                   ) {
-    //image[pos.x + ( WIDTH[0] * pos.y )] = 0;
-
     Complex constant_complex_number = {
         (float)((float)pos.x * STEP[0] + (float)MIN_X[0]),
         (float)((float)pos.y * STEP[0] + (float)MIN_Y[0])
