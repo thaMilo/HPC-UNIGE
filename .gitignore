@@ -2,3 +2,7 @@
 target
 *.ppm
 Cargo.lock
+
+# metal partial files
+*.air
+*.metallib
