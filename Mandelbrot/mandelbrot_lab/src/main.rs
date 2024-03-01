@@ -70,9 +70,13 @@ fn main() {
     );
 
     let sequential_data : Vec<i32> = frame.compute_set();
-    frame.visualize(&sequential_data, "./mandelbrot/output_ppm/sequential.ppm");
+    let _ = frame.visualize(&sequential_data, "./mandelbrot/output_ppm/sequential.ppm");
     let metal_data : Vec<i32> = frame.compute_metal();
-    frame.visualize(&metal_data, "./mandelbrot/output_ppm/metal.ppm");
+    let _ = frame.visualize(&metal_data, "./mandelbrot/output_ppm/metal.ppm");
     let error_data  : mandelbrot_analysis::MandelBrotError = mandelbrot_analysis::compute_error(&sequential_data, &metal_data).expect("The vectors have different lengths");
-    frame.visualize(&error_data.error_vector, "./mandelbrot/output_ppm/error.ppm");
+    let _ = frame.visualize(&error_data.error_vector, "./mandelbrot/output_ppm/error.ppm");
+    
+    println!("Divergent pixels: {}", error_data.divergent_pixels);
+    println!("Mean: {}", error_data.mean);
+    println!("Variance: {}", error_data.variance);
 }
