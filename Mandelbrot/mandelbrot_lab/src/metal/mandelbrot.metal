@@ -22,7 +22,7 @@ Complex add(Complex a, Complex b) {
 }
 
 // Metal compute kernel function
-kernel void generateMandelbrotSet(device float* image [[buffer(0)]],
+kernel void generateMandelbrotSet(device int* image [[buffer(0)]],
                                   device float* STEP [[buffer(1)]],
                                   device int* MIN_X [[buffer(2)]],
                                   device int* MIN_Y [[buffer(3)]],
@@ -38,11 +38,8 @@ kernel void generateMandelbrotSet(device float* image [[buffer(0)]],
 
     Complex z = {0.0f, 0.0f};
 
-    for ( int i = 0; i < iterations[0]; i++ ) {
-        z = pow(z);
-        z.re += constant_complex_number.re;
-        z.im += constant_complex_number.im;
-
+    for ( int i = 0; i < 1000; i++ ) {
+        z = add(pow(z ), constant_complex_number);
         if ((z.re * z.re + z.im * z.im) >= 4.0f) {
             image[pos.x + ( WIDTH[0] * pos.y )] = i;
             return;

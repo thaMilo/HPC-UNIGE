@@ -68,6 +68,6 @@ fn main() {
 
     let data = frame.compute_metal();
     frame
-        .visualize(data, "./mandelbrot_metal.ppm")
+        .visualize(data, "./mandelbrot_set.ppm")
         .expect("not able to create visualization file");
 }
