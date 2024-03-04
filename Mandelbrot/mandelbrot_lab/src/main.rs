@@ -42,15 +42,28 @@ fn main() {
             .parse::<i32>()
             .expect("iterations is not a number"),
     );
-    
-    let infos = MandelBrotSimulationInfo {
-        methods: vec!["sequential".to_string(), "metal".to_string(), "metal".to_string()],
-        execution_times: vec![1000, 100, 1000],
-        resolutions: vec![frame.resolution, frame.resolution, frame.resolution],
-        iterations: vec![frame.iterations, frame.iterations, frame.iterations],
-    };
-    
-    /* computations */ 
 
-    let _ = save_results( infos, "./src/mandelbrot/output_csv/mandelbrot_analysis.csv");  
+    if matches.get_one::<String>("sequential-rust").unwrap() == "run" {
+        let (seq_data, _seq_allocation_time, seq_computation_time) = frame.compute_set();
+
+        let infos = MandelBrotSimulationInfo {
+            simulation_name: matches.get_one::<String>("name").unwrap().to_string(),
+            method: "sequential-rust".to_string(),
+            execution_time: seq_computation_time.as_secs_f64(),
+            resolution: frame.resolution,
+            iterations: frame.iterations,
+        };
+
+        if matches.get_one::<String>("visualize").unwrap() != "no_path" {
+            let file_path = format!(
+                "{}{}{}",
+                String::from("./src/mandelbrot/output_ppm/").to_string(),
+                matches.get_one::<String>("name").unwrap(),
+                String::from("_rust_sequential.ppm").to_string()
+            );
+            let _ = frame.visualize(&seq_data, file_path.as_str());
+        }
+
+        let _ = save_results(infos, "./src/mandelbrot/output_csv/mandelbrot_analysis.csv");
+    }
 }

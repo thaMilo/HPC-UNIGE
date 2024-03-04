@@ -1,6 +1,7 @@
 use anyhow::{Ok, Result};
-use polars::prelude::*;
 use std::fs::File;
+use std::fs::OpenOptions;
+use std::io::Write;
 
 pub struct MandelBrotError {
     pub error_vector: Vec<i32>,
@@ -11,10 +12,11 @@ pub struct MandelBrotError {
 }
 
 pub struct MandelBrotSimulationInfo {
-    pub methods: Vec<String>,
-    pub execution_times: Vec<i64>,
-    pub resolutions: Vec<i32>,
-    pub iterations: Vec<i32>,
+    pub simulation_name: String,
+    pub method: String,
+    pub execution_time: f64,
+    pub resolution: i32,
+    pub iterations: i32,
 }
 
 pub fn compute_error(
@@ -54,20 +56,20 @@ pub fn compute_error(
 }
 
 pub fn save_results(infos: MandelBrotSimulationInfo, path: &str) -> Result<(), anyhow::Error> {
-    let method_serie = Series::new("method", &infos.methods);
-    let execution_time_serie = Series::new("execution_time", &infos.execution_times);
-    let resolution_serie = Series::new("resolution", &infos.resolutions);
-    let iterations_serie = Series::new("iterations", &infos.iterations);
+    // write to file in path
+    let file_path = path;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(file_path)
+        .expect("Failed to open file in append mode");
 
-    let mut df = DataFrame::new(vec![
-        method_serie,
-        execution_time_serie,
-        resolution_serie,
-        iterations_serie,
-    ])?;
+    file.write_all(format!(
+        "{},{},{},{},{}\n",
+        infos.simulation_name, infos.method, infos.execution_time, infos.resolution, infos.iterations
+    ).as_bytes())
+    .expect("Failed to write to file");
 
-    let mut writer = CsvWriter::new(File::create(path)?);
-    writer.finish(&mut df)?;
-
+    file.flush().expect("Failed to flush buffer");
     Ok(())
 }
