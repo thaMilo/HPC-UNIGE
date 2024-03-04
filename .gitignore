@@ -1,8 +1,11 @@
 .DS_Store
 target
 *.ppm
+*.csv
 Cargo.lock
 
 # metal partial files
 *.air
 *.metallib
+
+

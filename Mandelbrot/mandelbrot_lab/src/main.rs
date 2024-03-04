@@ -1,5 +1,5 @@
 use crate::mandelbrot::clap_arguments;
-use crate::mandelbrot::mandelbrot_analysis;
+use crate::mandelbrot::mandelbrot_analysis::*;
 use crate::mandelbrot::mandelbrot_frame::MandelBrotFrame;
 mod mandelbrot;
 
@@ -42,20 +42,15 @@ fn main() {
             .parse::<i32>()
             .expect("iterations is not a number"),
     );
+    
+    let infos = MandelBrotSimulationInfo {
+        methods: vec!["sequential".to_string(), "metal".to_string(), "metal".to_string()],
+        execution_times: vec![1000, 100, 1000],
+        resolutions: vec![frame.resolution, frame.resolution, frame.resolution],
+        iterations: vec![frame.iterations, frame.iterations, frame.iterations],
+    };
+    
+    /* computations */ 
 
-    /* let (sequential_data, sequential_allocation_time, sequential_computation_time) = frame.compute_set(); */
-    // let _ = frame.visualize(&sequential_data, "./mandelbrot/output_ppm/sequential.ppm");
-
-    let (metal_data, metal_allocation_time, metal_computation_time) = frame.compute_metal();
-    
-    println!("Metal allocation time: {:?}", metal_allocation_time);
-    println!("Metal computation time: {:?}", metal_computation_time);
-    
-    let _ = frame.visualize(&metal_data, "./mandelbrot/output_ppm/metal.ppm");
-    
-    /*     let error_data  : mandelbrot_analysis::MandelBrotError = mandelbrot_analysis::compute_error(&sequential_data, &metal_data).expect("The vectors have different lengths"); */
-    // let _ = frame.visualize(&error_data.error_vector, "./mandelbrot/output_ppm/error.ppm");
-    // println!("Divergent pixels: {}", error_data.divergent_pixels);
-    // println!("Mean: {}", error_data.mean);
-    // println!("Variance: {}", error_data.variance);
+    let _ = save_results( infos, "./src/mandelbrot/output_csv/mandelbrot_analysis.csv");  
 }

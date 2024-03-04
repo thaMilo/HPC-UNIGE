@@ -9,16 +9,16 @@ use std::time::Instant;
 const LIB_DATA: &[u8] = include_bytes!("metal/mandelbrot.metallib");
 
 pub struct MandelBrotFrame {
-    min_x: i32,
-    max_x: i32,
-    min_y: i32,
-    max_y: i32,
-    resolution: i32,
-    width: i32,
-    height: i32,
-    step: f32,
-    degree: i32,
-    iterations: i32,
+    pub min_x: i32,
+    pub max_x: i32,
+    pub min_y: i32,
+    pub max_y: i32,
+    pub resolution: i32,
+    pub width: i32,
+    pub height: i32,
+    pub step: f32,
+    pub degree: i32,
+    pub iterations: i32,
 }
 
 impl MandelBrotFrame {
