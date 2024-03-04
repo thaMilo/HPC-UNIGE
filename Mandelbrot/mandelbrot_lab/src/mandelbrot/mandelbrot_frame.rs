@@ -48,7 +48,7 @@ impl MandelBrotFrame {
         }
     }
 
-    pub fn compute_metal(&self) -> Vec<i32> {
+    pub fn compute_metal(&self) -> (Vec<i32>, Duration, Duration){
         let metal_allocation_started = Instant::now();
         let device: &DeviceRef = &Device::system_default().expect("No device found");
         let lib = device.new_library_with_data(LIB_DATA).unwrap();
@@ -134,38 +134,13 @@ impl MandelBrotFrame {
         let slice = unsafe { std::slice::from_raw_parts(ptr, len) };
         let metal_allocation_total_time = metal_allocation_started.elapsed();
 
-        self.save_statistics(
-            "metal",
-            self.min_x,
-            self.max_x,
-            self.min_y,
-            self.max_y,
-            self.resolution,
-            self.degree,
-            self.iterations,
-            metal_allocation_total_time,
-            metal_computation_total_time,
-        );
-        slice.to_vec()
+        (slice.to_vec(), metal_allocation_total_time, metal_computation_total_time)
     }
 
-    pub fn save_statistics(
-        &self,
-        name: &str,
-        min_x: i32,
-        max_x: i32,
-        min_y: i32,
-        max_y: i32,
-        resolution: i32,
-        degree: i32,
-        iterations: i32,
-        allocation_time: Duration,
-        computation_time: Duration,
-    ) {
-    }
-
-    pub fn compute_set(&self) -> Vec<i32> {
+    pub fn compute_set(&self) -> (Vec<i32>, Duration, Duration){
+        let sequential_allocation_started = Instant::now();
         let mut image = vec![0; (self.width * self.height) as usize];
+        let sequential_computation_started = Instant::now();
         for pos in 0..self.width * self.height {
             image[pos as usize] = 0;
             let row = pos / self.width;
@@ -184,7 +159,9 @@ impl MandelBrotFrame {
                 }
             }
         }
-        image
+        let sequential_computation_total_time = sequential_computation_started.elapsed();
+        let sequential_allocation_total_time = sequential_allocation_started.elapsed();
+        (image, sequential_allocation_total_time, sequential_computation_total_time)
     }
 
     pub fn visualize(&self, data: &Vec<i32>, filepath: &str) -> Result<(), anyhow::Error> {

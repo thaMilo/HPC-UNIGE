@@ -41,3 +41,5 @@ pub fn compute_error(
         accuracy,
     })
 }
+
+pub fn plot_sequential(){}
