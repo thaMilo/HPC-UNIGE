@@ -3,10 +3,10 @@ use std::path::Path;
 use std::fs;
 
 fn main() {
-	let src_dir = Path::new("mandelbrot/metal");
+    let src_dir = Path::new("src/mandelbrot/metal");
     let metal_path = src_dir.join("mandelbrot.metal");
     let metallib_path = src_dir.join("mandelbrot.metallib");
-	let air_path = src_dir.join("mandelbrot.air");
+    let air_path = src_dir.join("mandelbrot.air");
 
     // Only compile if the .metal file is newer than the .metallib file
     if metallib_path.exists() && fs::metadata(metal_path.clone()).unwrap().modified().unwrap() <= fs::metadata(metallib_path.clone()).unwrap().modified().unwrap() {
