@@ -68,12 +68,12 @@ fn main() {
     }
 
      if matches.get_one::<String>("metal").unwrap() == "run" {
-        let (seq_data, _seq_allocation_time, seq_computation_time) = frame.compute_set();
+        let (metal_data, _metal_allocation_time, metal_computation_time) = frame.compute_metal();
 
         let infos = MandelBrotSimulationInfo {
             simulation_name: matches.get_one::<String>("name").unwrap().to_string(),
             method: "metal-rust".to_string(),
-            execution_time: seq_computation_time.as_secs_f64(),
+            execution_time: metal_computation_time.as_secs_f64(),
             resolution: frame.resolution,
             iterations: frame.iterations,
         };
@@ -85,7 +85,7 @@ fn main() {
                 matches.get_one::<String>("name").unwrap(),
                 String::from("_rust_metal.ppm").to_string()
             );
-            let _ = frame.visualize(&seq_data, file_path.as_str());
+            let _ = frame.visualize(&metal_data, file_path.as_str());
         }
 
         let _ = save_results(infos, "./output_csv/mandelbrot_analysis.csv");
