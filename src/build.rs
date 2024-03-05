@@ -3,7 +3,7 @@ use std::path::Path;
 use std::fs;
 
 fn main() {
-	let src_dir = Path::new("src/mandelbrot/metal");
+	let src_dir = Path::new("mandelbrot/metal");
     let metal_path = src_dir.join("mandelbrot.metal");
     let metallib_path = src_dir.join("mandelbrot.metallib");
 	let air_path = src_dir.join("mandelbrot.air");
