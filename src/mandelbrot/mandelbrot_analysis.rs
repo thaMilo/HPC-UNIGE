@@ -56,13 +56,16 @@ pub fn compute_error(
 }
 
 pub fn save_results(infos: MandelBrotSimulationInfo, path: &str) -> Result<(), anyhow::Error> {
-    // write to file in path
-    let file_path = path;
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(file_path)
+        .open(path)
         .expect("Failed to open file in append mode");
+    
+    if file.metadata().unwrap().len() == 0 {
+        file.write_all(b"simulation_name,method,execution_time,resolution,iterations\n")
+            .expect("Failed to write to file");
+    }
 
     file.write_all(format!(
         "{},{},{},{},{}\n",
