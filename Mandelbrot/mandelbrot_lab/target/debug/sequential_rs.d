@@ -1,1 +1,0 @@
-/Users/milogalli/Desktop/Milo/university/DOING/HPC-UNIGE/Mandelbrot/sequential_rs/target/debug/sequential_rs: /Users/milogalli/Desktop/Milo/university/DOING/HPC-UNIGE/Mandelbrot/sequential_rs/src/main.rs /Users/milogalli/Desktop/Milo/university/DOING/HPC-UNIGE/Mandelbrot/sequential_rs/src/mandelbrot_frame.rs
