@@ -41,7 +41,19 @@ pub fn get_clap_arguments() -> clap::ArgMatches {
             Arg::new("visualize")
             .short('v')
             .long("visualize")
-            .default_value("no_path"),
+            .default_value("no_exec"),
+        )
+        .arg(
+            Arg::new("error")
+            .short('e')
+            .long("error")
+            .default_value("no_exec"),
+        )
+        .arg(
+            Arg::new("visualize-error")
+            .short('E')
+            .long("visualize-error")
+            .default_value("no_exec"),
         )
         .get_matches();
     matches

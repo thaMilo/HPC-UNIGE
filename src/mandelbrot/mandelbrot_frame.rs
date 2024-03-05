@@ -164,7 +164,7 @@ impl MandelBrotFrame {
         (image, sequential_allocation_total_time, sequential_computation_total_time)
     }
 
-    pub fn visualize(&self, data: &Vec<i32>, filepath: &str) -> Result<(), anyhow::Error> {
+    pub fn visualize(&self, data: &Vec<i32>, filepath: &str, error: bool) -> Result<(), anyhow::Error> {
         let mut f = fs::File::create(filepath)?;
         f.write_all(b"P3\n")?;
         f.write_all(format!("{} {}\n", self.width, self.height).as_bytes())?;
@@ -173,14 +173,18 @@ impl MandelBrotFrame {
         for row in 0..self.height {
             for col in 0..self.width {
                 let val = data[(row * self.width + col) as usize];
-                // let ir = (val as f32 * (255.0 / self.iterations as f32)) as i32;
-                if val == 0{
-                    f.write_all(b"0 0 0")?;
+                if error {
+                    let ir = (val as f32 * (255.0 / self.iterations as f32)) as i32;
+                    f.write_all(format!("{} {} {}", ir, ir, ir).as_bytes())?;
                 } else {
-                    let ir = (1000.0/(val as f64)) % 255.0;
-                    let ig = (1000.0/((val as f64)) + 85.0) % 255.0;
-                    let ib = (1000.0/((val as f64)) + 170.0) % 255.0;
-                    f.write_all(format!("{} {} {}", ir as i32, ig as i32, ib as i32).as_bytes())?;
+                    if val == 0{
+                        f.write_all(b"0 0 0")?;
+                    } else {
+                        let ir = (1000.0/(val as f64)) % 255.0;
+                        let ig = (1000.0/((val as f64)) + 85.0) % 255.0;
+                        let ib = (1000.0/((val as f64)) + 170.0) % 255.0;
+                        f.write_all(format!("{} {} {}", ir as i32, ig as i32, ib as i32).as_bytes())?;
+                    }
                 }
 
                 if col < self.width - 1 {
