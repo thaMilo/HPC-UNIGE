@@ -19,6 +19,7 @@ pub struct MandelBrotSimulationInfo {
     pub resolution: i32,
     pub iterations: i32,
     pub accuracy: i64,
+    pub thread_count: u64,
 }
 
 pub fn compute_error(
@@ -67,13 +68,13 @@ pub fn save_results(infos: MandelBrotSimulationInfo, path: &str) -> Result<(), a
         .expect("Failed to open file in append mode");
     
     if file.metadata().unwrap().len() == 0 {
-        file.write_all(b"simulation_name,method,execution_time,resolution,iterations,accuracy\n")
+        file.write_all(b"simulation_name,method,execution_time,resolution,iterations,accuracy,thread_count\n")
             .expect("Failed to write to file");
     }
 
     file.write_all(format!(
-        "{},{},{},{},{},{}\n",
-        infos.simulation_name, infos.method, infos.execution_time, infos.resolution, infos.iterations, infos.accuracy
+        "{},{},{},{},{},{},{}\n",
+        infos.simulation_name, infos.method, infos.execution_time, infos.resolution, infos.iterations, infos.accuracy, infos.thread_count
     ).as_bytes())
     .expect("Failed to write to file");
 

@@ -86,6 +86,7 @@ fn main() {
             resolution: frame.resolution,
             iterations: frame.iterations,
             accuracy: error.accuracy,
+            thread_count: 1,
         };
 
         if matches.get_one::<String>("visualize").unwrap() == "run" {
@@ -102,7 +103,8 @@ fn main() {
     }
 
      if matches.get_one::<String>("metal").unwrap() == "run" {
-        let (metal_data, _metal_allocation_time, metal_computation_time) = frame.compute_metal();
+        let mut thread_count: u64 = matches.get_one::<String>("thread-count").unwrap().parse::<u64>().unwrap();
+        let (metal_data, _metal_allocation_time, metal_computation_time) = frame.compute_metal(&mut thread_count);
 
         let mut error = MandelBrotError{
             error_vector: vec![],
@@ -132,6 +134,7 @@ fn main() {
             resolution: frame.resolution,
             iterations: frame.iterations,
             accuracy: error.accuracy,
+            thread_count: thread_count,
         };
 
         if matches.get_one::<String>("visualize").unwrap() == "run" {

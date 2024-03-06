@@ -26,6 +26,12 @@ pub fn get_clap_arguments() -> clap::ArgMatches {
                 .default_value("1000")
         )
         .arg(
+            Arg::new("thread-count")
+            .short('t')
+            .long("thread-count")
+            .default_value("1")
+        )
+        .arg(
             Arg::new("sequential-rust")
             .short('s')
             .long("sequential-rust")

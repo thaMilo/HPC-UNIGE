@@ -48,12 +48,12 @@ impl MandelBrotFrame {
         }
     }
 
-    pub fn compute_metal(&self) -> (Vec<i32>, Duration, Duration){
-        let metal_allocation_started = Instant::now();
+    pub fn compute_metal(&self, thread_count: &mut u64) -> (Vec<i32>, Duration, Duration){
+        let metal_allocation_started: Instant = Instant::now();
         let device: &DeviceRef = &Device::system_default().expect("No device found");
-        let lib = device.new_library_with_data(LIB_DATA).unwrap();
-        let function = lib.get_function("generateMandelbrotSet", None).unwrap();
-        let pipeline = device
+        let lib: metal::Library = device.new_library_with_data(LIB_DATA).unwrap();
+        let function: metal::Function = lib.get_function("generateMandelbrotSet", None).unwrap();
+        let pipeline: metal::ComputePipelineState = device
             .new_compute_pipeline_state_with_function(&function)
             .unwrap();
 
@@ -119,7 +119,11 @@ impl MandelBrotFrame {
 
         // specify thread count and organization
         let grid_size = metal::MTLSize::new(self.width as u64, self.height as u64, 1);
-        let threadgroup_size = metal::MTLSize::new(1024, 1, 1);
+        let max_thread_count = pipeline.max_total_threads_per_threadgroup();
+        if *thread_count > max_thread_count {
+            *thread_count = max_thread_count;
+        }
+        let threadgroup_size = metal::MTLSize::new(*thread_count, 1, 1);
         compute_encoder.dispatch_threads(grid_size, threadgroup_size);
         compute_encoder.end_encoding();
 
