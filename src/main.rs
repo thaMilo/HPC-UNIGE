@@ -134,7 +134,7 @@ fn main() {
             resolution: frame.resolution,
             iterations: frame.iterations,
             accuracy: error.accuracy,
-            thread_count: thread_count,
+            thread_count,
         };
 
         if matches.get_one::<String>("visualize").unwrap() == "run" {

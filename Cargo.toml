@@ -1,6 +1,6 @@
 [package]
 build = "src/build.rs"
-name = "HPC-UNIGE"
+name = "hpc-unige"
 version = "0.1.0"
 edition = "2021"
 
