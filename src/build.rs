@@ -1,8 +1,12 @@
 use std::process::Command;
 use std::path::Path;
 use std::fs;
+use std::env;
 
 fn main() {
+    if env::consts::OS != "macos" {
+        return;
+    }
     let src_dir = Path::new("src/mandelbrot/metal");
     let metal_path = src_dir.join("mandelbrot.metal");
     let metallib_path = src_dir.join("mandelbrot.metallib");
