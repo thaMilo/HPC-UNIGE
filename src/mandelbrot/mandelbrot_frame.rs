@@ -1,5 +1,4 @@
 use anyhow::Result;
-use metal::{Device, DeviceRef, MTLResourceOptions};
 use num_complex::Complex;
 use std::fs;
 use std::io::Write;
@@ -46,99 +45,6 @@ impl MandelBrotFrame {
             degree,
             iterations,
         }
-    }
-
-    pub fn compute_metal(&self, thread_count: &mut u64) -> (Vec<i32>, Duration, Duration){
-        let metal_allocation_started: Instant = Instant::now();
-        let device: &DeviceRef = &Device::system_default().expect("No device found");
-        let lib: metal::Library = device.new_library_with_data(LIB_DATA).unwrap();
-        let function: metal::Function = lib.get_function("generateMandelbrotSet", None).unwrap();
-        let pipeline: metal::ComputePipelineState = device
-            .new_compute_pipeline_state_with_function(&function)
-            .unwrap();
-
-        let buffer_step = device.new_buffer_with_data(
-            unsafe { std::mem::transmute(&self.step) },
-            std::mem::size_of::<f32>() as u64,
-            MTLResourceOptions::StorageModeShared,
-        );
-
-        let buffer_min_x = device.new_buffer_with_data(
-            unsafe { std::mem::transmute(&self.min_x) },
-            std::mem::size_of::<i32>() as u64,
-            MTLResourceOptions::StorageModeShared,
-        );
-
-        let buffer_min_y = device.new_buffer_with_data(
-            unsafe { std::mem::transmute(&self.min_y) },
-            std::mem::size_of::<i32>() as u64,
-            MTLResourceOptions::StorageModeShared,
-        );
-
-        let buffer_width = device.new_buffer_with_data(
-            unsafe { std::mem::transmute(&self.width) },
-            std::mem::size_of::<i32>() as u64,
-            MTLResourceOptions::StorageModeShared,
-        );
-
-        let buffer_height = device.new_buffer_with_data(
-            unsafe { std::mem::transmute(&self.height) },
-            std::mem::size_of::<i32>() as u64,
-            MTLResourceOptions::StorageModeShared,
-        );
-
-        let buffer_iterations = device.new_buffer_with_data(
-            unsafe { std::mem::transmute(&self.iterations) },
-            std::mem::size_of::<i32>() as u64,
-            MTLResourceOptions::StorageModeShared,
-        );
-
-        let buffer_result = device.new_buffer(
-            (self.width * self.height * std::mem::size_of::<i32>() as i32) as u64,
-            MTLResourceOptions::StorageModeShared,
-        );
-
-        let command_queue = device.new_command_queue();
-        let command_buffer = command_queue.new_command_buffer();
-        let compute_encoder = command_buffer.new_compute_command_encoder();
-
-        compute_encoder.set_compute_pipeline_state(&pipeline);
-        compute_encoder.set_buffers(
-            0,
-            &[
-                Some(&buffer_result),
-                Some(&buffer_step),
-                Some(&buffer_min_x),
-                Some(&buffer_min_y),
-                Some(&buffer_width),
-                Some(&buffer_height),
-                Some(&buffer_iterations),
-            ],
-            &[0; 7],
-        );
-
-        // specify thread count and organization
-        let grid_size = metal::MTLSize::new(self.width as u64, self.height as u64, 1);
-        let max_thread_count = pipeline.max_total_threads_per_threadgroup();
-        if *thread_count > max_thread_count {
-            *thread_count = max_thread_count;
-        }
-        let threadgroup_size = metal::MTLSize::new(*thread_count, 1, 1);
-        compute_encoder.dispatch_threads(grid_size, threadgroup_size);
-        compute_encoder.end_encoding();
-
-        // commit the command buffer and wait for it to complete
-        let metal_computation_started = Instant::now();
-        command_buffer.commit();
-        command_buffer.wait_until_completed();
-        let metal_computation_total_time = metal_computation_started.elapsed();
-
-        let ptr = buffer_result.contents() as *const i32;
-        let len = buffer_result.length() as usize / std::mem::size_of::<i32>();
-        let slice = unsafe { std::slice::from_raw_parts(ptr, len) };
-        let metal_allocation_total_time = metal_allocation_started.elapsed();
-
-        (slice.to_vec(), metal_allocation_total_time, metal_computation_total_time)
     }
 
     pub fn compute_set(&self) -> (Vec<i32>, Duration, Duration){

@@ -1,6 +1,5 @@
 use anyhow::{Ok, Result};
 use std::fs::File;
-use bincode::deserialize_from;
 use std::fs::OpenOptions;
 use std::io::Write;
 

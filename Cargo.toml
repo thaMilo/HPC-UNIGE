@@ -1,5 +1,4 @@
 [package]
-build = "src/build.rs"
 name = "hpc-unige"
 version = "0.1.0"
 edition = "2021"
@@ -10,7 +9,6 @@ edition = "2021"
 anyhow = "1.0.80"
 bincode = "1.3.3"
 clap = { version = "4.5.1", features = ["derive", "cargo"] }
-metal = "0.27.0"
 num-complex = "0.4.5"
 
 # Switch profiles usign `cargo build --profile <profile>` e.g. `cargo build --profile opt-0`
