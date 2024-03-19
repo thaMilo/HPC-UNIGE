@@ -1,13 +1,7 @@
-#[macro_use]
-extern crate bincode;
-
 use crate::mandelbrot::clap_arguments;
 use crate::mandelbrot::mandelbrot_analysis::*;
 use crate::mandelbrot::mandelbrot_frame::MandelBrotFrame;
 
-use std::fs::File;
-use bincode::serialize_into;
-use std::io::BufWriter;
 mod mandelbrot;
 
 fn main() {

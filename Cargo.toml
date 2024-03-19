@@ -31,7 +31,3 @@ opt-level = 2
 inherits = "release"
 opt-level = 3
 
-[profile.opt-native]
-inherits = "release"
-opt-level = 3
-target-cpu = "native"
