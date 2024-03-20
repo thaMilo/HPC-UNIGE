@@ -48,7 +48,16 @@ impl MandelBrotFrame {
         }
     }
 
-    pub fn compute_metal(&self, thread_count: &mut u64) -> (Vec<i32>, Duration, Duration){
+    pub fn compute_metal(&self, thread_count: &mut u64) -> (Vec<i32>, Duration, Duration) {
+        let capture_scope = metal::CaptureManager::shared()
+            .new_capture_scope_with_device(&metal::Device::system_default().unwrap());
+
+        let capture_descriptor = metal::CaptureDescriptor::new();
+        capture_descriptor.set_capture_scope(&capture_scope);
+        capture_descriptor.set_output_url(std::path::Path::new("./gputrace/framecapture.gputrace"));
+        capture_descriptor.set_destination(metal::MTLCaptureDestination::GpuTraceDocument);
+        metal::CaptureManager::shared().start_capture(&capture_descriptor);
+
         let metal_allocation_started: Instant = Instant::now();
         let device: &DeviceRef = &Device::system_default().expect("No device found");
         let lib: metal::Library = device.new_library_with_data(LIB_DATA).unwrap();
@@ -120,28 +129,37 @@ impl MandelBrotFrame {
         // specify thread count and organization
         let grid_size = metal::MTLSize::new(self.width as u64, self.height as u64, 1);
         let max_thread_count = pipeline.max_total_threads_per_threadgroup();
+
         if *thread_count > max_thread_count {
             *thread_count = max_thread_count;
         }
+
         let threadgroup_size = metal::MTLSize::new(*thread_count, 1, 1);
         compute_encoder.dispatch_threads(grid_size, threadgroup_size);
         compute_encoder.end_encoding();
 
-        // commit the command buffer and wait for it to complete
+        capture_scope.begin_scope();
         let metal_computation_started = Instant::now();
+
+        // commit the command buffer and wait for it to complete
         command_buffer.commit();
         command_buffer.wait_until_completed();
         let metal_computation_total_time = metal_computation_started.elapsed();
+        capture_scope.end_scope();
 
         let ptr = buffer_result.contents() as *const i32;
         let len = buffer_result.length() as usize / std::mem::size_of::<i32>();
         let slice = unsafe { std::slice::from_raw_parts(ptr, len) };
         let metal_allocation_total_time = metal_allocation_started.elapsed();
 
-        (slice.to_vec(), metal_allocation_total_time, metal_computation_total_time)
+        (
+            slice.to_vec(),
+            metal_allocation_total_time,
+            metal_computation_total_time,
+        )
     }
 
-    pub fn compute_set(&self) -> (Vec<i32>, Duration, Duration){
+    pub fn compute_set(&self) -> (Vec<i32>, Duration, Duration) {
         let sequential_allocation_started = Instant::now();
         let mut image = vec![0; (self.width * self.height) as usize];
         let sequential_computation_started = Instant::now();
@@ -165,10 +183,19 @@ impl MandelBrotFrame {
         }
         let sequential_computation_total_time = sequential_computation_started.elapsed();
         let sequential_allocation_total_time = sequential_allocation_started.elapsed();
-        (image, sequential_allocation_total_time, sequential_computation_total_time)
+        (
+            image,
+            sequential_allocation_total_time,
+            sequential_computation_total_time,
+        )
     }
 
-    pub fn visualize(&self, data: &Vec<i32>, filepath: &str, error: bool) -> Result<(), anyhow::Error> {
+    pub fn visualize(
+        &self,
+        data: &Vec<i32>,
+        filepath: &str,
+        error: bool,
+    ) -> Result<(), anyhow::Error> {
         let mut f = fs::File::create(filepath)?;
         f.write_all(b"P3\n")?;
         f.write_all(format!("{} {}\n", self.width, self.height).as_bytes())?;
@@ -181,13 +208,15 @@ impl MandelBrotFrame {
                     let ir = (val as f32 * (255.0 / self.iterations as f32)) as i32;
                     f.write_all(format!("{} {} {}", ir, ir, ir).as_bytes())?;
                 } else {
-                    if val == 0{
+                    if val == 0 {
                         f.write_all(b"0 0 0")?;
                     } else {
-                        let ir = (1000.0/(val as f64)) % 255.0;
-                        let ig = (1000.0/((val as f64)) + 85.0) % 255.0;
-                        let ib = (1000.0/((val as f64)) + 170.0) % 255.0;
-                        f.write_all(format!("{} {} {}", ir as i32, ig as i32, ib as i32).as_bytes())?;
+                        let ir = (1000.0 / (val as f64)) % 255.0;
+                        let ig = (1000.0 / (val as f64) + 85.0) % 255.0;
+                        let ib = (1000.0 / (val as f64) + 170.0) % 255.0;
+                        f.write_all(
+                            format!("{} {} {}", ir as i32, ig as i32, ib as i32).as_bytes(),
+                        )?;
                     }
                 }
 

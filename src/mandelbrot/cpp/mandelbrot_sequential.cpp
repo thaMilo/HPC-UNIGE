@@ -15,7 +15,7 @@
 #define RATIO_Y (MAX_Y - MIN_Y)
 
 // Image size
-#define RESOLUTION 1000
+#define RESOLUTION 2000
 #define WIDTH (RATIO_X * RESOLUTION)
 #define HEIGHT (RATIO_Y * RESOLUTION)
 
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 {
 	int *const image = new int[HEIGHT * WIDTH];
 
-	const auto start = chrono::steady_clock::now();
+	const std::chrono::steady_clock::time_point  start = chrono::steady_clock::now();
 	for (int pos = 0; pos < HEIGHT * WIDTH; pos++)
 	{
 		image[pos] = 0;
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	const auto end = chrono::steady_clock::now();
+	const std::chrono::steady_clock::time_point end = chrono::steady_clock::now();
 	cout << "Time elapsed: "
          << std::fixed << std::setprecision(2)
 		 << chrono::duration<double>(end - start).count()
